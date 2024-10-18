@@ -10,21 +10,18 @@ function App() {
     { code: "pt-br", name: "Português" },
   ];
 
-  
-
   const [idiomaOrigem, setIdiomaOrigem] = useState(languages[0].code);
   const [idiomaDestino, setIdiomaDestino] = useState(languages[5].code);
-
 
   const [textoOrigem, setTextoOrigem] = useState("");
   const [traducao, setTraducao] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  
+
   const traduzirTexto = async () => {
 
-    if (textoOrigem === "" ) return
-    
+    if (textoOrigem === "") return
+
     setIsLoading(true)
     try {
       const response = await fetch(
@@ -41,7 +38,23 @@ function App() {
 
   useEffect(() => {
     traduzirTexto()
-  }, [textoOrigem, idiomaOrigem, idiomaDestino])
+  }, [textoOrigem, idiomaOrigem, idiomaDestino]);
+
+  const trocarIdiomas = () => {
+    const origem = idiomaOrigem; // Armazena o idioma de origem atual
+    const destino = idiomaDestino; // Armazena o idioma de destino atual
+
+    // Troca os idiomas
+    setIdiomaOrigem(destino);
+    setIdiomaDestino(origem);
+
+    // Atribui a tradução ao texto de origem
+    setTextoOrigem(traducao);
+
+    // Inicia a tradução novamente com o novo idioma de origem e destino
+    traducao(""); // Limpa a tradução atual
+    traduzirTexto(); // Chama a função de tradução
+  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -67,7 +80,7 @@ function App() {
               <option value="it">Italiano</option>
             </select>
 
-            <button className="p-2 rounded-full hover:bg-gray-100 outline-none">
+            <button className="p-2 rounded-full hover:bg-gray-100 outline-none" onClick={trocarIdiomas}>
               <svg
                 className="w-5 h-5 text-headerColor"
                 fill="none"
@@ -102,9 +115,9 @@ function App() {
             <div className="p-4">
               <textarea
                 className="w-full h-40 text-lg text-textColor bg-transparent resize-none border-none outline-none"
-                placeholder="Digite seu texto..."  
+                placeholder="Digite seu texto..."
                 value={textoOrigem}
-                onChange={(evento) => setTextoOrigem(evento.target.value)}              
+                onChange={(evento) => setTextoOrigem(evento.target.value)}
               ></textarea>
             </div>
 
