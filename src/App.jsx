@@ -1,4 +1,4 @@
-
+import { useEffect, useState } from "react";
 
 function App() {
   const languages = [
@@ -10,8 +10,38 @@ function App() {
     { code: "pt-br", name: "Português" },
   ];
 
-  let isLoading = false
-  let error = ""
+  
+
+  const [idiomaOrigem, setIdiomaOrigem] = useState(languages[0].code);
+  const [idiomaDestino, setIdiomaDestino] = useState(languages[5].code);
+
+
+  const [textoOrigem, setTextoOrigem] = useState("");
+  const [traducao, setTraducao] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  
+  const traduzirTexto = async () => {
+
+    if (textoOrigem === "" ) return
+    
+    setIsLoading(true)
+    try {
+      const response = await fetch(
+        `https://api.mymemory.translated.net/get?q=${encodeURIComponent(textoOrigem)}&langpair=pt-br|en-us`
+      );
+      const data = await response.json();
+      setTraducao(data.responseData.translatedText);
+    } catch (error) {
+      setError("Erro na tradução: " + error.messageS);
+    }
+    setIsLoading(false)
+  };
+
+
+  useEffect(() => {
+    traduzirTexto()
+  }, [textoOrigem, idiomaOrigem, idiomaDestino])
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -26,10 +56,15 @@ function App() {
           <div className="flex items-center justify-between p-4 border-b border-gray-200">
             <select
               className="text-sm text-textColor bg-transparent border-none focus:outline-none cursor-pointer"
-              value="en-us"
+              value={idiomaOrigem}
+              onChange={(e) => setIdiomaOrigem(e.target.value)}
             >
               <option value="pt-br">Português</option>
               <option value="en-us">Inglês</option>
+              <option value="es">Espanhol</option>
+              <option value="fr">Francês</option>
+              <option value="de">Alemão</option>
+              <option value="it">Italiano</option>
             </select>
 
             <button className="p-2 rounded-full hover:bg-gray-100 outline-none">
@@ -51,10 +86,15 @@ function App() {
 
             <select
               className="text-sm text-textColor bg-transparent border-none focus:outline-none cursor-pointer"
-              value="pt-br"
+              value={idiomaDestino}
+              onChange={(e) => setIdiomaDestino(e.target.value)}
             >
               <option value="pt-br">Português</option>
               <option value="en-us">Inglês</option>
+              <option value="es">Espanhol</option>
+              <option value="fr">Francês</option>
+              <option value="de">Alemão</option>
+              <option value="it">Italiano</option>
             </select>
           </div>
 
@@ -62,17 +102,19 @@ function App() {
             <div className="p-4">
               <textarea
                 className="w-full h-40 text-lg text-textColor bg-transparent resize-none border-none outline-none"
-                placeholder="Digite seu texto..."                
+                placeholder="Digite seu texto..."  
+                value={textoOrigem}
+                onChange={(evento) => setTextoOrigem(evento.target.value)}              
               ></textarea>
             </div>
 
             <div className="relative p-4 bg-secondaryBackground border-l border-gray-200">
               {isLoading ? (
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-blue-500 border-t-2"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-blue-500 border-t-2" ></div>
                 </div>
               ) : (
-                <p className="text-lg text-textColor">Colocar aqui o texto traduzido</p>
+                <p className="text-lg text-textColor">{traducao}</p>
               )}
             </div>
           </div>
