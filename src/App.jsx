@@ -19,42 +19,41 @@ function App() {
   const [error, setError] = useState("");
 
   const traduzirTexto = async () => {
+    if (textoOrigem === "") return;
 
-    if (textoOrigem === "") return
-
-    setIsLoading(true)
+    setIsLoading(true);
+    setError("");
     try {
       const response = await fetch(
-        `https://api.mymemory.translated.net/get?q=${encodeURIComponent(textoOrigem)}&langpair=pt-br|en-us`
+        `https://api.mymemory.translated.net/get?q=${encodeURIComponent(textoOrigem)}&langpair=${idiomaOrigem}|${idiomaDestino}`
       );
       const data = await response.json();
-      setTraducao(data.responseData.translatedText);
+      if (data.responseData) {
+        setTraducao(data.responseData.translatedText);
+      } else {
+        setError("Erro na tradução");
+      }
     } catch (error) {
-      setError("Erro na tradução: " + error.messageS);
+      setError("Erro na tradução: " + error.message);
     }
-    setIsLoading(false)
+    setIsLoading(false);
   };
 
-
   useEffect(() => {
-    traduzirTexto()
+    traduzirTexto();
   }, [textoOrigem, idiomaOrigem, idiomaDestino]);
 
   const trocarIdiomas = () => {
-    const origem = idiomaOrigem; // Armazena o idioma de origem atual
-    const destino = idiomaDestino; // Armazena o idioma de destino atual
+    const origem = idiomaOrigem;
+    const destino = idiomaDestino;
 
-    // Troca os idiomas
     setIdiomaOrigem(destino);
     setIdiomaDestino(origem);
 
-    // Atribui a tradução ao texto de origem
     setTextoOrigem(traducao);
-
-    // Inicia a tradução novamente com o novo idioma de origem e destino
-    traducao(""); // Limpa a tradução atual
-    traduzirTexto(); // Chama a função de tradução
-  }
+    setTraducao(""); 
+    traduzirTexto();
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -72,15 +71,17 @@ function App() {
               value={idiomaOrigem}
               onChange={(e) => setIdiomaOrigem(e.target.value)}
             >
-              <option value="pt-br">Português</option>
-              <option value="en-us">Inglês</option>
-              <option value="es">Espanhol</option>
-              <option value="fr">Francês</option>
-              <option value="de">Alemão</option>
-              <option value="it">Italiano</option>
+              {languages.map((lang) => (
+                <option key={lang.code} value={lang.code}>
+                  {lang.name}
+                </option>
+              ))}
             </select>
 
-            <button className="p-2 rounded-full hover:bg-gray-100 outline-none" onClick={trocarIdiomas}>
+            <button
+              className="p-2 rounded-full hover:bg-gray-100 outline-none"
+              onClick={trocarIdiomas}
+            >
               <svg
                 className="w-5 h-5 text-headerColor"
                 fill="none"
@@ -102,12 +103,11 @@ function App() {
               value={idiomaDestino}
               onChange={(e) => setIdiomaDestino(e.target.value)}
             >
-              <option value="pt-br">Português</option>
-              <option value="en-us">Inglês</option>
-              <option value="es">Espanhol</option>
-              <option value="fr">Francês</option>
-              <option value="de">Alemão</option>
-              <option value="it">Italiano</option>
+              {languages.map((lang) => (
+                <option key={lang.code} value={lang.code}>
+                  {lang.name}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -117,14 +117,14 @@ function App() {
                 className="w-full h-40 text-lg text-textColor bg-transparent resize-none border-none outline-none"
                 placeholder="Digite seu texto..."
                 value={textoOrigem}
-                onChange={(evento) => setTextoOrigem(evento.target.value)}
+                onChange={(e) => setTextoOrigem(e.target.value)}
               ></textarea>
             </div>
 
             <div className="relative p-4 bg-secondaryBackground border-l border-gray-200">
               {isLoading ? (
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-blue-500 border-t-2" ></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-blue-500 border-t-2"></div>
                 </div>
               ) : (
                 <p className="text-lg text-textColor">{traducao}</p>
